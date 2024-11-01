@@ -3,11 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Particle Swarm</title>
+  <title>Interactive Particle Swarm</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <canvas id="particleCanvas"></canvas>
+  
+  <!-- Control Panel -->
+  <div id="controlPanel">
+    <h2>Particle Controls</h2>
+    <div id="speciesList"></div>
+    <button onclick="addSpecies()">Add New Species</button>
+  </div>
+  
   <script src="script.js"></script>
 </body>
 </html>
