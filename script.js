@@ -43,7 +43,6 @@ class Particle {
   }
 
   update() {
-    // Mouse influence
     const dx = this.x - mouse.x;
     const dy = this.y - mouse.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -52,22 +51,18 @@ class Particle {
       this.velocityY += mouse.vy * 0.05;
     }
 
-    // Dynamic destination logic for species
     const goalDx = this.species.goalX - this.x;
     const goalDy = this.species.goalY - this.y;
     const goalDistance = Math.sqrt(goalDx * goalDx + goalDy * goalDy);
 
-    // Move toward species goal point
     if (goalDistance > this.size) {
       this.velocityX += (goalDx / goalDistance) * this.species.schoolStrength;
       this.velocityY += (goalDy / goalDistance) * this.species.schoolStrength;
     } else {
-      // Assign new goal point once goal is reached
       this.species.goalX = Math.random() * canvas.width;
       this.species.goalY = Math.random() * canvas.height;
     }
 
-    // Avoid overlap with all particles
     particlesArray.forEach(particle => {
       const dx = particle.x - this.x;
       const dy = particle.y - this.y;
@@ -83,21 +78,18 @@ class Particle {
       }
     });
 
-    // Curved path control
     if (this.species.curveStrength > 0) {
       this.angle += this.species.curveStrength;
       this.velocityX += Math.cos(this.angle) * 0.1;
       this.velocityY += Math.sin(this.angle) * 0.1;
     }
 
-    // Speed limit
     const speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
     if (speed > this.species.speed) {
       this.velocityX = (this.velocityX / speed) * this.species.speed;
       this.velocityY = (this.velocityY / speed) * this.species.speed;
     }
 
-    // Edge wrapping
     this.x += this.velocityX;
     this.y += this.velocityY;
     if (this.x > canvas.width) this.x = 0;
@@ -115,13 +107,13 @@ function addSpecies() {
     id,
     name: `Species ${id}`,
     color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-    speed: 2,
-    avgSize: 5,
-    sizeVariation: 2,
-    schoolStrength: 0.005,
-    viewDistance: 80,
-    count: 30,
-    curveStrength: 0,
+    speed: Math.random() * 3 + 1,
+    avgSize: Math.random() * 10 + 3,
+    sizeVariation: Math.random() * 5,
+    schoolStrength: Math.random() * 0.02 + 0.005,
+    viewDistance: Math.random() * 100 + 50,
+    count: Math.floor(Math.random() * 20 + 10),
+    curveStrength: Math.random() * 0.1,
     goalX: Math.random() * canvas.width,
     goalY: Math.random() * canvas.height,
   };
@@ -162,6 +154,11 @@ function createSpeciesUI(species) {
 function toggleMenu(id) {
   const sliderGroup = document.querySelector(`#species-${id} .slider-group`);
   sliderGroup.style.display = sliderGroup.style.display === 'none' ? 'block' : 'none';
+}
+
+function togglePanel() {
+  const controlPanel = document.getElementById("controlPanel");
+  controlPanel.classList.toggle("minimized");
 }
 
 function updateSpecies(id, property, value) {

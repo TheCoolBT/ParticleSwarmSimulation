@@ -20,10 +20,22 @@ canvas {
   max-width: 300px;
   z-index: 100;
   font-family: Arial, sans-serif;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+#controlPanel.minimized {
+  transform: translateX(100%);
 }
 
 #controlPanel h2 {
   margin: 0 0 10px;
+  cursor: pointer;
+}
+
+#speciesContainer {
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .control-group {
