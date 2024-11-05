@@ -181,10 +181,6 @@ function openColorPicker(id) {
   document.body.removeChild(colorInput);
 }
 
-function updateSpeciesName(id, newName) {
-  const species = speciesList.find(s => s.id === id);
-  if (species) species.name = newName;
-}
 
 function toggleMenu(id) {
   const sliderGroup = document.querySelector(`#species-${id} .slider-group`);
@@ -203,13 +199,19 @@ function togglePanel() {
 
 function updateSpecies(id, property, value) {
   const species = speciesList.find(s => s.id === id);
-  if (species) species[property] = value;
-
-  if (property === 'color') {
-    document.querySelector(`#species-${id} .color-btn`).style.backgroundColor = value;
-    document.querySelector(`#species-${id} .color-indicator`).style.backgroundColor = value;
+  if (species) {
+    species[property] = value;
+    
+    // Update the color of the color-indicator in the UI if property is 'color'
+    if (property === 'color') {
+      const colorIndicator = document.querySelector(`#species-${id} .color-indicator`);
+      if (colorIndicator) {
+        colorIndicator.style.backgroundColor = value;
+      }
+    }
   }
 }
+
 
 function updateSize(id, property, value) {
   const species = speciesList.find(s => s.id === id);
