@@ -28,9 +28,13 @@ canvas {
   transform: translateX(100%);
 }
 
-#controlPanel h2 {
-  margin: 0 0 10px;
+#toggleArrow {
+  position: fixed;  /* Outside the panel */
+  right: 20px;
+  top: 10px;
+  font-size: 20px;
   cursor: pointer;
+  z-index: 101;
 }
 
 #speciesContainer {
@@ -47,7 +51,6 @@ canvas {
 
 .control-group h3 {
   cursor: pointer;
-  margin: 5px 0;
   display: flex;
   align-items: center;
 }
@@ -57,6 +60,16 @@ canvas {
   height: 15px;
   border-radius: 50%;
   margin-right: 8px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.color-btn {
+  border-radius: 50%;
+  border: none;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 
 .slider-group {
@@ -64,12 +77,13 @@ canvas {
   margin-top: 5px;
 }
 
-.control-group input[type="range"],
-.control-group input[type="color"],
-.control-group input[type="number"] {
-  display: block;
-  width: 100%;
-  margin: 5px 0;
+.settings-icon {
+  pointer-events: auto; 
+  margin-left: 8px;
+}
+
+.minimize-icon {
+  color: yellow;
 }
 
 input[type="range"]::-webkit-slider-runnable-track {
@@ -83,4 +97,32 @@ input[type="range"]::-webkit-slider-thumb {
   height: 12px;
   background: #fff;
   cursor: pointer;
+}
+
+#mouseStrengthContainer {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  color: white;
+  font-family: Arial, sans-serif;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+#errorMessage {
+  position: absolute;
+  bottom: 80px;
+  right: 20px;
+  color: red;
+  font-family: Arial, sans-serif;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 10px;
+  border-radius: 8px;
+  display: none;
+}
+
+.slider-group label {
+  display: block;
+  margin: 5px 0;
 }

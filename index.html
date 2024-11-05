@@ -11,14 +11,25 @@
   
   <!-- Control Panel -->
   <div id="controlPanel">
-    <h2 onclick="togglePanel()">Particle Controls</h2>
+    <h2>Particle Controls</h2>
     <div id="speciesContainer">
       <div id="speciesList"></div>
     </div>
     <button onclick="addSpecies()">Add New Species</button>
   </div>
-  
+
+  <!-- Toggle Arrow (positioned outside panel) -->
+  <span id="toggleArrow" onclick="togglePanel()">➡️</span>
+
+  <!-- Mouse Strength Slider -->
+  <div id="mouseStrengthContainer">
+    <label>Mouse Strength</label>
+    <input type="range" id="mouseStrength" min="0" max="5" step="0.1" value="1">
+  </div>
+
+  <!-- Error Message -->
+  <div id="errorMessage"></div>
+
   <script src="script.js"></script>
 </body>
 </html>
-

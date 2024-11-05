@@ -7,6 +7,9 @@ canvas.height = window.innerHeight;
 const particlesArray = [];
 const speciesList = [];
 let nextSpeciesId = 0;
+let mouseStrength = 1;  // Default mouse influence strength
+
+const MAX_PARTICLES = 2000;
 
 const mouse = {
   x: null,
@@ -47,17 +50,24 @@ class Particle {
     const dy = this.y - mouse.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     if (distance < mouse.radius) {
-      this.velocityX += mouse.vx * 0.05;
-      this.velocityY += mouse.vy * 0.05;
+      this.velocityX += mouse.vx * 0.05 * mouseStrength;
+      this.velocityY += mouse.vy * 0.05 * mouseStrength;
     }
 
     const goalDx = this.species.goalX - this.x;
     const goalDy = this.species.goalY - this.y;
     const goalDistance = Math.sqrt(goalDx * goalDx + goalDy * goalDy);
 
+    const whirlpoolEffect = this.species.whirlpool * 0.1;
     if (goalDistance > this.size) {
-      this.velocityX += (goalDx / goalDistance) * this.species.schoolStrength;
-      this.velocityY += (goalDy / goalDistance) * this.species.schoolStrength;
+      if (whirlpoolEffect > 0) {
+        const tangentX = -goalDy / goalDistance;
+        const tangentY = goalDx / goalDistance;
+        this.velocityX += tangentX * whirlpoolEffect;
+        this.velocityY += tangentY * whirlpoolEffect;
+      }
+      this.velocityX += (goalDx / goalDistance) * (1 - whirlpoolEffect) * this.species.schoolStrength;
+      this.velocityY += (goalDy / goalDistance) * (1 - whirlpoolEffect) * this.species.schoolStrength;
     } else {
       this.species.goalX = Math.random() * canvas.width;
       this.species.goalY = Math.random() * canvas.height;
@@ -114,6 +124,7 @@ function addSpecies() {
     viewDistance: Math.random() * 100 + 50,
     count: Math.floor(Math.random() * 20 + 10),
     curveStrength: Math.random() * 0.1,
+    whirlpool: Math.random(),
     goalX: Math.random() * canvas.width,
     goalY: Math.random() * canvas.height,
   };
@@ -123,6 +134,11 @@ function addSpecies() {
 }
 
 function addParticles(species, count) {
+  if (particlesArray.length + count > MAX_PARTICLES) {
+    displayErrorMessage(`Cannot add more than ${MAX_PARTICLES} particles. You can add ${MAX_PARTICLES - particlesArray.length} more.`);
+    return;
+  }
+  
   for (let i = 0; i < count; i++) {
     particlesArray.push(new Particle(species));
   }
@@ -134,36 +150,65 @@ function createSpeciesUI(species) {
   speciesDiv.id = `species-${species.id}`;
   
   speciesDiv.innerHTML = `
-    <h3 onclick="toggleMenu(${species.id})">
-      <span class="color-indicator" style="background: ${species.color}"></span>${species.name}
-    </h3>
-    <div class="slider-group">
-      <label>Color: <input type="color" value="${species.color}" onchange="updateSpecies(${species.id}, 'color', this.value)"></label>
-      <label>Speed: <input type="range" min="0.5" max="5" step="0.1" value="${species.speed}" onchange="updateSpecies(${species.id}, 'speed', parseFloat(this.value))"></label>
-      <label>Count: <input type="number" min="1" max="100" value="${species.count}" onchange="updateCount(${species.id}, this.value)"></label>
-      <label>Avg Size: <input type="range" min="3" max="15" value="${species.avgSize}" onchange="updateSize(${species.id}, 'avgSize', parseFloat(this.value))"></label>
-      <label>Size Variation: <input type="range" min="0" max="10" step="0.1" value="${species.sizeVariation}" onchange="updateSize(${species.id}, 'sizeVariation', parseFloat(this.value))"></label>
-      <label>School Strength: <input type="range" min="0.001" max="0.02" step="0.001" value="${species.schoolStrength}" onchange="updateSpecies(${species.id}, 'schoolStrength', parseFloat(this.value))"></label>
-      <label>Path Curvature: <input type="range" min="0" max="0.1" step="0.01" value="${species.curveStrength}" onchange="updateSpecies(${species.id}, 'curveStrength', parseFloat(this.value))"></label>
-      <button onclick="removeSpecies(${species.id})">Delete</button>
-    </div>
-  `;
+  <h3>
+  <span class="color-indicator" style="background: ${species.color};"></span>${species.name}
+  <span class="settings-icon" onclick="toggleMenu(${species.id})">⚙️</span>
+  </h3>
+
+  <div class="slider-group" style="display: none;">
+    <label>Color: <input type="color" value="${species.color}" onchange="updateSpecies(${species.id}, 'color', this.value)"></label>
+    <label>Speed: <input type="range" min="0.5" max="5" step="0.1" value="${species.speed}" onchange="updateSpecies(${species.id}, 'speed', parseFloat(this.value))"></label>
+    <label>Count: <input type="number" min="1" max="100" value="${species.count}" onchange="updateCount(${species.id}, this.value)"></label>
+    <label>Avg Size: <input type="range" min="3" max="15" value="${species.avgSize}" onchange="updateSize(${species.id}, 'avgSize', parseFloat(this.value))"></label>
+    <label>Size Variation: <input type="range" min="0" max="10" step="0.1" value="${species.sizeVariation}" onchange="updateSize(${species.id}, 'sizeVariation', parseFloat(this.value))"></label>
+    <label>School Strength: <input type="range" min="0.001" max="0.02" step="0.001" value="${species.schoolStrength}" onchange="updateSpecies(${species.id}, 'schoolStrength', parseFloat(this.value))"></label>
+    <label>Path Curvature: <input type="range" min="0" max="0.1" step="0.01" value="${species.curveStrength}" onchange="updateSpecies(${species.id}, 'curveStrength', parseFloat(this.value))"></label>
+    <label>Whirlpool: <input type="range" min="0" max="1" step="0.01" value="${species.whirlpool}" onchange="updateSpecies(${species.id}, 'whirlpool', parseFloat(this.value))"></label>
+    <button onclick="removeSpecies(${species.id})">Delete</button>
+  </div>
+`;
   document.getElementById("speciesList").appendChild(speciesDiv);
+}
+
+function openColorPicker(id) {
+  const colorInput = document.createElement("input");
+  colorInput.type = "color";
+  colorInput.value = speciesList.find(s => s.id === id).color;
+  colorInput.style.display = "none";
+  colorInput.onchange = (e) => updateSpecies(id, 'color', e.target.value);
+  document.body.appendChild(colorInput);
+  colorInput.click();
+  document.body.removeChild(colorInput);
+}
+
+function updateSpeciesName(id, newName) {
+  const species = speciesList.find(s => s.id === id);
+  if (species) species.name = newName;
 }
 
 function toggleMenu(id) {
   const sliderGroup = document.querySelector(`#species-${id} .slider-group`);
-  sliderGroup.style.display = sliderGroup.style.display === 'none' ? 'block' : 'none';
+  if (sliderGroup) {
+    sliderGroup.style.display = sliderGroup.style.display === "none" ? "block" : "none";
+  }
 }
+
 
 function togglePanel() {
   const controlPanel = document.getElementById("controlPanel");
+  const toggleArrow = document.getElementById("toggleArrow");
   controlPanel.classList.toggle("minimized");
+  toggleArrow.innerText = controlPanel.classList.contains("minimized") ? "⬅️" : "➡️";
 }
 
 function updateSpecies(id, property, value) {
   const species = speciesList.find(s => s.id === id);
   if (species) species[property] = value;
+
+  if (property === 'color') {
+    document.querySelector(`#species-${id} .color-btn`).style.backgroundColor = value;
+    document.querySelector(`#species-${id} .color-indicator`).style.backgroundColor = value;
+  }
 }
 
 function updateSize(id, property, value) {
@@ -177,12 +222,24 @@ function updateSize(id, property, value) {
 function updateCount(id, value) {
   const species = speciesList.find(s => s.id === id);
   if (species) {
-    const diff = value - species.count;
-    species.count = value;
-    if (diff > 0) addParticles(species, diff);
-    else particlesArray.splice(0, particlesArray.length, ...particlesArray.filter(p => p.species.id !== id));
+    const newCount = parseInt(value);
+    const diff = newCount - species.count;
+    
+    if (diff > 0) {
+      // Add particles if new count is higher
+      addParticles(species, diff);
+    } else {
+      // Remove particles if new count is lower
+      particlesArray.splice(
+        0, 
+        particlesArray.length, 
+        ...particlesArray.filter(p => p.species.id !== id || Math.random() > Math.abs(diff) / species.count)
+      );
+    }
+    species.count = newCount;
   }
 }
+
 
 function removeSpecies(id) {
   const speciesIndex = speciesList.findIndex(s => s.id === id);
@@ -191,6 +248,15 @@ function removeSpecies(id) {
     particlesArray.splice(0, particlesArray.length, ...particlesArray.filter(p => p.species.id !== id));
     document.getElementById(`species-${id}`).remove();
   }
+}
+
+function displayErrorMessage(message) {
+  const errorMessage = document.getElementById("errorMessage");
+  errorMessage.textContent = message;
+  errorMessage.style.display = "block";
+  setTimeout(() => {
+    errorMessage.style.display = "none";
+  }, 3000);
 }
 
 function animate() {
@@ -217,6 +283,10 @@ window.addEventListener("resize", () => {
   canvas.height = window.innerHeight;
   particlesArray.length = 0;
   speciesList.forEach(species => addParticles(species, species.count));
+});
+
+document.getElementById("mouseStrength").addEventListener("input", (e) => {
+  mouseStrength = parseFloat(e.target.value);
 });
 
 animate();
