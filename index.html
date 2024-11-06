@@ -1,35 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Particle Swarm</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <canvas id="particleCanvas"></canvas>
-  
-  <!-- Control Panel -->
-  <div id="controlPanel">
-    <h2>Particle Controls</h2>
-    <div id="speciesContainer">
-      <div id="speciesList"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Particle Swarm</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Control Panel -->
+    <div id="controlPanel">
+      <h2>Particle Controls</h2>
+      <div id="speciesContainer">
+        <div id="speciesList"></div>
+      </div>
+      <button onclick="addSpecies()">Add New Species</button>
     </div>
-    <button onclick="addSpecies()">Add New Species</button>
-  </div>
 
-  <!-- Toggle Arrow (positioned outside panel) -->
-  <span id="toggleArrow" onclick="togglePanel()">➡️</span>
+    <!-- Toggle Arrow (positioned outside panel) -->
+    <span id="toggleArrow" onclick="togglePanel()">➡️</span>
 
-  <!-- Mouse Strength Slider -->
-  <div id="mouseStrengthContainer">
-    <label>Mouse Strength</label>
-    <input type="range" id="mouseStrength" min="0" max="5" step="0.1" value="1">
-  </div>
+    <!-- Mouse Strength Slider -->
+    <div id="mouseStrengthContainer">
+      <label>Mouse Strength</label>
+      <input
+        type="range"
+        id="mouseStrength"
+        min="0"
+        max="5"
+        step="0.1"
+        value="1"
+      />
+    </div>
 
-  <!-- Error Message -->
-  <div id="errorMessage"></div>
+    <!-- Error Message -->
+    <div id="errorMessage"></div>
 
-  <script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>

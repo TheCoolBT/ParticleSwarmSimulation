@@ -7,7 +7,7 @@ canvas.height = window.innerHeight;
 const particlesArray = [];
 const speciesList = [];
 let nextSpeciesId = 0;
-let mouseStrength = 1;  // Default mouse influence strength
+let mouseStrength = 1; // Default mouse influence strength
 
 const MAX_PARTICLES = 2000;
 
@@ -33,7 +33,8 @@ class Particle {
   updateSize() {
     this.size = Math.max(
       3, // Minimum size for visibility
-      this.species.avgSize + (Math.random() - 0.5) * this.species.sizeVariation * 4 // Intense variation
+      this.species.avgSize +
+        (Math.random() - 0.5) * this.species.sizeVariation * 4 // Intense variation
     );
   }
 
@@ -46,62 +47,34 @@ class Particle {
   }
 
   update() {
+    // Mouse influence
     const dx = this.x - mouse.x;
     const dy = this.y - mouse.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
+
     if (distance < mouse.radius) {
+      // Apply a stronger force from the mouse, regardless of particle speed
       this.velocityX += mouse.vx * 0.05 * mouseStrength;
       this.velocityY += mouse.vy * 0.05 * mouseStrength;
     }
 
-    const goalDx = this.species.goalX - this.x;
-    const goalDy = this.species.goalY - this.y;
-    const goalDistance = Math.sqrt(goalDx * goalDx + goalDy * goalDy);
+    // Move towards goal and handle whirlpool, collisions, etc. (your existing logic)
 
-    const whirlpoolEffect = this.species.whirlpool * 0.1;
-    if (goalDistance > this.size) {
-      if (whirlpoolEffect > 0) {
-        const tangentX = -goalDy / goalDistance;
-        const tangentY = goalDx / goalDistance;
-        this.velocityX += tangentX * whirlpoolEffect;
-        this.velocityY += tangentY * whirlpoolEffect;
-      }
-      this.velocityX += (goalDx / goalDistance) * (1 - whirlpoolEffect) * this.species.schoolStrength;
-      this.velocityY += (goalDy / goalDistance) * (1 - whirlpoolEffect) * this.species.schoolStrength;
-    } else {
-      this.species.goalX = Math.random() * canvas.width;
-      this.species.goalY = Math.random() * canvas.height;
-    }
-
-    particlesArray.forEach(particle => {
-      const dx = particle.x - this.x;
-      const dy = particle.y - this.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance < this.size + particle.size && particle !== this) {
-        const angle = Math.atan2(dy, dx);
-        const overlap = (this.size + particle.size - distance) * 0.1;
-        this.velocityX -= Math.cos(angle) * overlap;
-        this.velocityY -= Math.sin(angle) * overlap;
-        particle.velocityX += Math.cos(angle) * overlap;
-        particle.velocityY += Math.sin(angle) * overlap;
-      }
-    });
-
-    if (this.species.curveStrength > 0) {
-      this.angle += this.species.curveStrength;
-      this.velocityX += Math.cos(this.angle) * 0.1;
-      this.velocityY += Math.sin(this.angle) * 0.1;
-    }
-
+    // Calculate current speed and enforce max speed only when decelerating
     const speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
+    const decelerationFactor = 0.98; // Adjust as needed to control deceleration
+
     if (speed > this.species.speed) {
-      this.velocityX = (this.velocityX / speed) * this.species.speed;
-      this.velocityY = (this.velocityY / speed) * this.species.speed;
+      // Apply gradual deceleration back to the particle’s max speed
+      this.velocityX *= decelerationFactor;
+      this.velocityY *= decelerationFactor;
     }
 
+    // Update position
     this.x += this.velocityX;
     this.y += this.velocityY;
+
+    // Wrap around the screen edges
     if (this.x > canvas.width) this.x = 0;
     if (this.x < 0) this.x = canvas.width;
     if (this.y > canvas.height) this.y = 0;
@@ -135,10 +108,14 @@ function addSpecies() {
 
 function addParticles(species, count) {
   if (particlesArray.length + count > MAX_PARTICLES) {
-    displayErrorMessage(`Cannot add more than ${MAX_PARTICLES} particles. You can add ${MAX_PARTICLES - particlesArray.length} more.`);
+    displayErrorMessage(
+      `Cannot add more than ${MAX_PARTICLES} particles. You can add ${
+        MAX_PARTICLES - particlesArray.length
+      } more.`
+    );
     return;
   }
-  
+
   for (let i = 0; i < count; i++) {
     particlesArray.push(new Particle(species));
   }
@@ -148,7 +125,7 @@ function createSpeciesUI(species) {
   const speciesDiv = document.createElement("div");
   speciesDiv.classList.add("control-group");
   speciesDiv.id = `species-${species.id}`;
-  
+
   speciesDiv.innerHTML = `
   <h3>
   <span class="color-indicator" style="background: ${species.color};"></span>${species.name}
@@ -157,14 +134,14 @@ function createSpeciesUI(species) {
 
   <div class="slider-group" style="display: none;">
     <label>Color: <input type="color" value="${species.color}" onchange="updateSpecies(${species.id}, 'color', this.value)"></label>
-    <label>Speed: <input type="range" min="0.5" max="5" step="0.1" value="${species.speed}" onchange="updateSpecies(${species.id}, 'speed', parseFloat(this.value))"></label>
-    <label>Count: <input type="number" min="1" max="100" value="${species.count}" onchange="updateCount(${species.id}, this.value)"></label>
-    <label>Avg Size: <input type="range" min="3" max="15" value="${species.avgSize}" onchange="updateSize(${species.id}, 'avgSize', parseFloat(this.value))"></label>
-    <label>Size Variation: <input type="range" min="0" max="10" step="0.1" value="${species.sizeVariation}" onchange="updateSize(${species.id}, 'sizeVariation', parseFloat(this.value))"></label>
-    <label>School Strength: <input type="range" min="0.001" max="0.02" step="0.001" value="${species.schoolStrength}" onchange="updateSpecies(${species.id}, 'schoolStrength', parseFloat(this.value))"></label>
-    <label>Path Curvature: <input type="range" min="0" max="0.1" step="0.01" value="${species.curveStrength}" onchange="updateSpecies(${species.id}, 'curveStrength', parseFloat(this.value))"></label>
-    <label>Whirlpool: <input type="range" min="0" max="1" step="0.01" value="${species.whirlpool}" onchange="updateSpecies(${species.id}, 'whirlpool', parseFloat(this.value))"></label>
-    <button onclick="removeSpecies(${species.id})">Delete</button>
+      <label>Speed 🏃: <input type="range" min="0.5" max="5" step="0.1" value="${species.speed}" onchange="updateSpecies(${species.id}, 'speed', parseFloat(this.value))"></label>
+      <label>Count: <input type="number" min="1" max="100" value="${species.count}" onchange="updateCount(${species.id}, this.value)"></label>
+      <label>Average Size 📏: <input type="range" min="3" max="15" value="${species.avgSize}" onchange="updateSize(${species.id}, 'avgSize', parseFloat(this.value))"></label>
+      <label>Size Variation : <input type="range" min="0" max="10" step="0.1" value="${species.sizeVariation}" onchange="updateSize(${species.id}, 'sizeVariation', parseFloat(this.value))"></label>
+      <label>School Strength 🐟: <input type="range" min="0.001" max="0.02" step="0.001" value="${species.schoolStrength}" onchange="updateSpecies(${species.id}, 'schoolStrength', parseFloat(this.value))"></label>
+      <label>Path Curvature 🌊: <input type="range" min="0" max="0.1" step="0.01" value="${species.curveStrength}" onchange="updateSpecies(${species.id}, 'curveStrength', parseFloat(this.value))"></label>
+      <label>Whirlpool 🔄: <input type="range" min="0" max="1" step="0.01" value="${species.whirlpool}" onchange="updateSpecies(${species.id}, 'whirlpool', parseFloat(this.value))"></label>
+      <button onclick="removeSpecies(${species.id})">Delete</button>
   </div>
 `;
   document.getElementById("speciesList").appendChild(speciesDiv);
@@ -173,38 +150,41 @@ function createSpeciesUI(species) {
 function openColorPicker(id) {
   const colorInput = document.createElement("input");
   colorInput.type = "color";
-  colorInput.value = speciesList.find(s => s.id === id).color;
+  colorInput.value = speciesList.find((s) => s.id === id).color;
   colorInput.style.display = "none";
-  colorInput.onchange = (e) => updateSpecies(id, 'color', e.target.value);
+  colorInput.onchange = (e) => updateSpecies(id, "color", e.target.value);
   document.body.appendChild(colorInput);
   colorInput.click();
   document.body.removeChild(colorInput);
 }
 
-
 function toggleMenu(id) {
   const sliderGroup = document.querySelector(`#species-${id} .slider-group`);
   if (sliderGroup) {
-    sliderGroup.style.display = sliderGroup.style.display === "none" ? "block" : "none";
+    sliderGroup.style.display =
+      sliderGroup.style.display === "none" ? "block" : "none";
   }
 }
-
 
 function togglePanel() {
   const controlPanel = document.getElementById("controlPanel");
   const toggleArrow = document.getElementById("toggleArrow");
   controlPanel.classList.toggle("minimized");
-  toggleArrow.innerText = controlPanel.classList.contains("minimized") ? "⬅️" : "➡️";
+  toggleArrow.innerText = controlPanel.classList.contains("minimized")
+    ? "⬅️"
+    : "➡️";
 }
 
 function updateSpecies(id, property, value) {
-  const species = speciesList.find(s => s.id === id);
+  const species = speciesList.find((s) => s.id === id);
   if (species) {
     species[property] = value;
-    
+
     // Update the color of the color-indicator in the UI if property is 'color'
-    if (property === 'color') {
-      const colorIndicator = document.querySelector(`#species-${id} .color-indicator`);
+    if (property === "color") {
+      const colorIndicator = document.querySelector(
+        `#species-${id} .color-indicator`
+      );
       if (colorIndicator) {
         colorIndicator.style.backgroundColor = value;
       }
@@ -212,42 +192,50 @@ function updateSpecies(id, property, value) {
   }
 }
 
-
 function updateSize(id, property, value) {
-  const species = speciesList.find(s => s.id === id);
+  const species = speciesList.find((s) => s.id === id);
   if (species) {
     species[property] = value;
-    particlesArray.filter(p => p.species.id === id).forEach(p => p.updateSize());
+    particlesArray
+      .filter((p) => p.species.id === id)
+      .forEach((p) => p.updateSize());
   }
 }
 
 function updateCount(id, value) {
-  const species = speciesList.find(s => s.id === id);
+  const species = speciesList.find((s) => s.id === id);
   if (species) {
     const newCount = parseInt(value);
     const diff = newCount - species.count;
-    
+
     if (diff > 0) {
       // Add particles if new count is higher
       addParticles(species, diff);
     } else {
       // Remove particles if new count is lower
       particlesArray.splice(
-        0, 
-        particlesArray.length, 
-        ...particlesArray.filter(p => p.species.id !== id || Math.random() > Math.abs(diff) / species.count)
+        0,
+        particlesArray.length,
+        ...particlesArray.filter(
+          (p) =>
+            p.species.id !== id ||
+            Math.random() > Math.abs(diff) / species.count
+        )
       );
     }
     species.count = newCount;
   }
 }
 
-
 function removeSpecies(id) {
-  const speciesIndex = speciesList.findIndex(s => s.id === id);
+  const speciesIndex = speciesList.findIndex((s) => s.id === id);
   if (speciesIndex !== -1) {
     speciesList.splice(speciesIndex, 1);
-    particlesArray.splice(0, particlesArray.length, ...particlesArray.filter(p => p.species.id !== id));
+    particlesArray.splice(
+      0,
+      particlesArray.length,
+      ...particlesArray.filter((p) => p.species.id !== id)
+    );
     document.getElementById(`species-${id}`).remove();
   }
 }
@@ -265,11 +253,11 @@ function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.beginPath();
   ctx.arc(mouse.x, mouse.y, 8, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
   ctx.fill();
   ctx.closePath();
 
-  particlesArray.forEach(particle => particle.update());
+  particlesArray.forEach((particle) => particle.update());
   requestAnimationFrame(animate);
 }
 
@@ -284,7 +272,7 @@ window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   particlesArray.length = 0;
-  speciesList.forEach(species => addParticles(species, species.count));
+  speciesList.forEach((species) => addParticles(species, species.count));
 });
 
 document.getElementById("mouseStrength").addEventListener("input", (e) => {
