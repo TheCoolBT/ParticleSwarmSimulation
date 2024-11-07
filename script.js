@@ -51,37 +51,67 @@ class Particle {
     const dx = this.x - mouse.x;
     const dy = this.y - mouse.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-
+    
     if (distance < mouse.radius) {
       // Apply a stronger force from the mouse, regardless of particle speed
       this.velocityX += mouse.vx * 0.05 * mouseStrength;
       this.velocityY += mouse.vy * 0.05 * mouseStrength;
     }
-
-    // Move towards goal and handle whirlpool, collisions, etc. (your existing logic)
-
-    // Calculate current speed and enforce max speed only when decelerating
+  
+    // Move towards goal and handle whirlpool effect
+    const goalDx = this.species.goalX - this.x;
+    const goalDy = this.species.goalY - this.y;
+    const goalDistance = Math.sqrt(goalDx * goalDx + goalDy * goalDy);
+  
+    const whirlpoolEffect = this.species.whirlpool * 0.1;  // Adjust whirlpool effect scale
+    if (goalDistance > this.size) {
+      // Apply whirlpool force if enabled
+      if (whirlpoolEffect > 0) {
+        const tangentX = -goalDy / goalDistance;
+        const tangentY = goalDx / goalDistance;
+        this.velocityX += tangentX * whirlpoolEffect;
+        this.velocityY += tangentY * whirlpoolEffect;
+      }
+  
+      // Apply school strength toward the goal
+      this.velocityX += (goalDx / goalDistance) * (1 - whirlpoolEffect) * this.species.schoolStrength;
+      this.velocityY += (goalDy / goalDistance) * (1 - whirlpoolEffect) * this.species.schoolStrength;
+    } else {
+      // Set a new random goal when the current one is reached
+      this.species.goalX = Math.random() * canvas.width;
+      this.species.goalY = Math.random() * canvas.height;
+    }
+  
+    // Path Curvature influence
+    if (this.species.curveStrength > 0) {
+      this.angle += this.species.curveStrength;
+      this.velocityX += Math.cos(this.angle) * 0.1;
+      this.velocityY += Math.sin(this.angle) * 0.1;
+    }
+  
+    // Calculate current speed and apply gradual deceleration if exceeding max speed
     const speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
-    const decelerationFactor = 0.98; // Adjust as needed to control deceleration
-
+    const decelerationFactor = 0.98;  // Control deceleration rate
+  
     if (speed > this.species.speed) {
       // Apply gradual deceleration back to the particle’s max speed
       this.velocityX *= decelerationFactor;
       this.velocityY *= decelerationFactor;
     }
-
+  
     // Update position
     this.x += this.velocityX;
     this.y += this.velocityY;
-
+  
     // Wrap around the screen edges
     if (this.x > canvas.width) this.x = 0;
     if (this.x < 0) this.x = canvas.width;
     if (this.y > canvas.height) this.y = 0;
     if (this.y < 0) this.y = canvas.height;
-
+  
     this.draw();
   }
+  
 }
 
 function addSpecies() {
