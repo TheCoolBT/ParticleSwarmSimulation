@@ -47,7 +47,6 @@ class Particle {
   }
 
   update() {
-    // Check collision toggle state
     const collisionEnabled = document.getElementById("collisionCheckbox").checked;
   
     // Mouse influence
@@ -84,7 +83,15 @@ class Particle {
       this.species.goalY = Math.random() * canvas.height;
     }
   
-    // Repulsion
+    // Apply River force
+    if (this.species.river > 0) {
+      const riverForceX = Math.cos(this.species.riverDirection) * this.species.river;
+      const riverForceY = Math.sin(this.species.riverDirection) * this.species.river;
+      this.velocityX += riverForceX;
+      this.velocityY += riverForceY;
+    }
+  
+    // Repulsion force
     particlesArray.forEach((particle) => {
       const dx = particle.x - this.x;
       const dy = particle.y - this.y;
@@ -124,11 +131,13 @@ class Particle {
       this.velocityY += Math.sin(this.angle) * 0.1;
     }
   
-    // Apply speed cap
-    const speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
-    if (speed > this.species.speed) {
-      this.velocityX *= 0.98;
-      this.velocityY *= 0.98;
+    // Combine velocity components and cap speed
+    let totalSpeed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
+  
+    if (totalSpeed > this.species.speed) {
+      const scalingFactor = this.species.speed / totalSpeed;
+      this.velocityX *= scalingFactor;
+      this.velocityY *= scalingFactor;
     }
   
     // Update position
@@ -143,7 +152,9 @@ class Particle {
   
     this.draw();
   }
-}  
+
+}
+  
 
 function addSpecies() {
   const id = nextSpeciesId++;
@@ -154,12 +165,14 @@ function addSpecies() {
     speed: Math.random() * 3 + 1,
     avgSize: Math.random() * 10 + 3,
     sizeVariation: Math.random() * 5,
-    schoolStrength: Math.random() * 0.02 + 0.005, // Attraction
-    repulsion: Math.random() * 0.02 + 0.005, // Repulsion
+    schoolStrength: Math.random() * 0.02 + 0.005,
+    repulsion: Math.random() * 0.02, // New repulsion property
     viewDistance: Math.random() * 100 + 50,
     count: Math.floor(Math.random() * 20 + 10),
     curveStrength: Math.random() * 0.1,
     whirlpool: Math.random(),
+    river: 0, // Default river strength
+    riverDirection: Math.random() * Math.PI * 2, // Random initial direction
     goalX: Math.random() * canvas.width,
     goalY: Math.random() * canvas.height,
   };
@@ -167,6 +180,7 @@ function addSpecies() {
   createSpeciesUI(newSpecies);
   addParticles(newSpecies, newSpecies.count);
 }
+
 
 
 function addParticles(species, count) {
@@ -222,6 +236,9 @@ function createSpeciesUI(species) {
       </label>
       <label>Whirlpool 🔄: 
         <input type="range" min="0" max="1" step="0.01" value="${species.whirlpool}" onchange="updateSpecies(${species.id}, 'whirlpool', parseFloat(this.value))">
+      </label>
+      <label>River 🏊‍♂️: 
+       <input type="range" min="0" max="1" step="0.01" value="${species.river}" onchange="updateSpecies(${species.id}, 'river', parseFloat(this.value))">
       </label>
       <button onclick="removeSpecies(${species.id})">Delete</button>
     </div>
