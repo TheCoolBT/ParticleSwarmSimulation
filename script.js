@@ -180,24 +180,43 @@ function createSpeciesUI(species) {
 
   speciesDiv.innerHTML = `
   <h3>
-  <span class="color-indicator" style="background: ${species.color};"></span>${species.name}
-  <span class="settings-icon" onclick="toggleMenu(${species.id})">⚙️</span>
+    <span class="color-indicator" style="background: ${species.color};"></span>${species.name}
+    <span class="settings-icon" onclick="toggleMenu(${species.id})">⚙️</span>
   </h3>
 
   <div class="slider-group" style="display: none;">
-    <label>Color: <input type="color" value="${species.color}" onchange="updateSpecies(${species.id}, 'color', this.value)"></label>
-      <label>Speed 🏃: <input type="range" min="0.5" max="5" step="0.1" value="${species.speed}" onchange="updateSpecies(${species.id}, 'speed', parseFloat(this.value))"></label>
-      <label>Count: <input type="number" min="1" max="100" value="${species.count}" onchange="updateCount(${species.id}, this.value)"></label>
-      <label>Average Size 📏: <input type="range" min="3" max="15" value="${species.avgSize}" onchange="updateSize(${species.id}, 'avgSize', parseFloat(this.value))"></label>
-      <label>Size Variation : <input type="range" min="0" max="10" step="0.1" value="${species.sizeVariation}" onchange="updateSize(${species.id}, 'sizeVariation', parseFloat(this.value))"></label>
-      <label>School Strength 🐟: <input type="range" min="0.001" max="0.02" step="0.001" value="${species.schoolStrength}" onchange="updateSpecies(${species.id}, 'schoolStrength', parseFloat(this.value))"></label>
-      <label>Path Curvature 🌊: <input type="range" min="0" max="0.1" step="0.01" value="${species.curveStrength}" onchange="updateSpecies(${species.id}, 'curveStrength', parseFloat(this.value))"></label>
-      <label>Whirlpool 🔄: <input type="range" min="0" max="1" step="0.01" value="${species.whirlpool}" onchange="updateSpecies(${species.id}, 'whirlpool', parseFloat(this.value))"></label>
-      <button onclick="removeSpecies(${species.id})">Delete</button>
+    <label>Color: 
+      <input type="color" value="${species.color}" onchange="updateSpecies(${species.id}, 'color', this.value)">
+    </label>
+    <label>Speed 🏃: 
+      <input type="range" min="0.5" max="5" step="0.1" value="${species.speed}" onchange="updateSpecies(${species.id}, 'speed', parseFloat(this.value))">
+    </label>
+    <label>Count: 
+      <input type="number" min="1" max="100" value="${species.count}" onchange="updateCount(${species.id}, this.value)">
+    </label>
+    <label>Average Size 📏: 
+      <input type="range" min="3" max="15" step="0.1" value="${species.avgSize}" onchange="updateSize(${species.id}, 'avgSize', parseFloat(this.value))">
+    </label>
+    <label>Size Variation 🔄: 
+      <input type="range" min="0" max="10" step="0.1" value="${species.sizeVariation}" onchange="updateSize(${species.id}, 'sizeVariation', parseFloat(this.value))">
+    </label>
+    <label>School Strength 🐟: 
+      <input type="range" min="0.001" max="0.02" step="0.001" value="${species.schoolStrength}" onchange="updateSpecies(${species.id}, 'schoolStrength', parseFloat(this.value))">
+    </label>
+    <label>Path Curvature 🌊: 
+      <input type="range" min="0" max="0.1" step="0.01" value="${species.curveStrength}" onchange="updateSpecies(${species.id}, 'curveStrength', parseFloat(this.value))">
+    </label>
+    <label>Whirlpool ♻️: 
+      <input type="range" min="0" max="1" step="0.01" value="${species.whirlpool}" onchange="updateSpecies(${species.id}, 'whirlpool', parseFloat(this.value))">
+    </label>
+    <button onclick="removeSpecies(${species.id})">Delete</button>
   </div>
-`;
+  `;
   document.getElementById("speciesList").appendChild(speciesDiv);
+  
 }
+
+
 
 function openColorPicker(id) {
   const colorInput = document.createElement("input");
@@ -329,6 +348,11 @@ window.addEventListener("resize", () => {
 
 document.getElementById("mouseStrength").addEventListener("input", (e) => {
   mouseStrength = parseFloat(e.target.value);
+});
+
+document.getElementById("backgroundColorPicker").addEventListener("input", (event) => {
+  const newColor = event.target.value;
+  canvas.style.backgroundColor = newColor; // Dynamically updates the canvas background
 });
 
 animate();
