@@ -47,7 +47,7 @@ class Particle {
   }
 
   update() {
-    // Get the checkbox state
+    // Check collision toggle state
     const collisionEnabled = document.getElementById("collisionCheckbox").checked;
   
     // Mouse influence
@@ -61,9 +61,8 @@ class Particle {
     }
   
     // Decelerate mouse effect
-    const mouseDecelerationFactor = 0.99999;
-    mouse.vx *= mouseDecelerationFactor;
-    mouse.vy *= mouseDecelerationFactor;
+    mouse.vx *= 0.99999;
+    mouse.vy *= 0.99999;
   
     // Whirlpool and goal influence
     const goalDx = this.species.goalX - this.x;
@@ -85,9 +84,24 @@ class Particle {
       this.species.goalY = Math.random() * canvas.height;
     }
   
-    // Only handle collision if enabled
+    // Repulsion
+    particlesArray.forEach((particle) => {
+      const dx = particle.x - this.x;
+      const dy = particle.y - this.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+  
+      if (distance < this.species.viewDistance && particle !== this) {
+        const angle = Math.atan2(dy, dx);
+        const force = (this.species.repulsion * (this.species.viewDistance - distance)) / this.species.viewDistance;
+  
+        this.velocityX -= Math.cos(angle) * force;
+        this.velocityY -= Math.sin(angle) * force;
+      }
+    });
+  
+    // Handle collision only if enabled
     if (collisionEnabled) {
-      particlesArray.forEach(particle => {
+      particlesArray.forEach((particle) => {
         const dx = particle.x - this.x;
         const dy = particle.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -112,10 +126,9 @@ class Particle {
   
     // Apply speed cap
     const speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
-    const decelerationFactor = 0.98;
     if (speed > this.species.speed) {
-      this.velocityX *= decelerationFactor;
-      this.velocityY *= decelerationFactor;
+      this.velocityX *= 0.98;
+      this.velocityY *= 0.98;
     }
   
     // Update position
@@ -130,11 +143,7 @@ class Particle {
   
     this.draw();
   }
-  
-
-
-  
-}
+}  
 
 function addSpecies() {
   const id = nextSpeciesId++;
@@ -145,7 +154,8 @@ function addSpecies() {
     speed: Math.random() * 3 + 1,
     avgSize: Math.random() * 10 + 3,
     sizeVariation: Math.random() * 5,
-    schoolStrength: Math.random() * 0.02 + 0.005,
+    schoolStrength: Math.random() * 0.02 + 0.005, // Attraction
+    repulsion: Math.random() * 0.02 + 0.005, // Repulsion
     viewDistance: Math.random() * 100 + 50,
     count: Math.floor(Math.random() * 20 + 10),
     curveStrength: Math.random() * 0.1,
@@ -157,6 +167,7 @@ function addSpecies() {
   createSpeciesUI(newSpecies);
   addParticles(newSpecies, newSpecies.count);
 }
+
 
 function addParticles(species, count) {
   if (particlesArray.length + count > MAX_PARTICLES) {
@@ -179,43 +190,44 @@ function createSpeciesUI(species) {
   speciesDiv.id = `species-${species.id}`;
 
   speciesDiv.innerHTML = `
-  <h3>
-    <span class="color-indicator" style="background: ${species.color};"></span>${species.name}
-    <span class="settings-icon" onclick="toggleMenu(${species.id})">⚙️</span>
-  </h3>
+    <h3>
+      <span class="color-indicator" style="background: ${species.color};"></span>${species.name}
+      <span class="settings-icon" onclick="toggleMenu(${species.id})">⚙️</span>
+    </h3>
 
-  <div class="slider-group" style="display: none;">
-    <label>Color: 
-      <input type="color" value="${species.color}" onchange="updateSpecies(${species.id}, 'color', this.value)">
-    </label>
-    <label>Speed 🏃: 
-      <input type="range" min="0.5" max="5" step="0.1" value="${species.speed}" onchange="updateSpecies(${species.id}, 'speed', parseFloat(this.value))">
-    </label>
-    <label>Count: 
-      <input type="number" min="1" max="100" value="${species.count}" onchange="updateCount(${species.id}, this.value)">
-    </label>
-    <label>Average Size 📏: 
-      <input type="range" min="3" max="15" step="0.1" value="${species.avgSize}" onchange="updateSize(${species.id}, 'avgSize', parseFloat(this.value))">
-    </label>
-    <label>Size Variation 🔄: 
-      <input type="range" min="0" max="10" step="0.1" value="${species.sizeVariation}" onchange="updateSize(${species.id}, 'sizeVariation', parseFloat(this.value))">
-    </label>
-    <label>School Strength 🐟: 
-      <input type="range" min="0.001" max="0.02" step="0.001" value="${species.schoolStrength}" onchange="updateSpecies(${species.id}, 'schoolStrength', parseFloat(this.value))">
-    </label>
-    <label>Path Curvature 🌊: 
-      <input type="range" min="0" max="0.1" step="0.01" value="${species.curveStrength}" onchange="updateSpecies(${species.id}, 'curveStrength', parseFloat(this.value))">
-    </label>
-    <label>Whirlpool ♻️: 
-      <input type="range" min="0" max="1" step="0.01" value="${species.whirlpool}" onchange="updateSpecies(${species.id}, 'whirlpool', parseFloat(this.value))">
-    </label>
-    <button onclick="removeSpecies(${species.id})">Delete</button>
-  </div>
+    <div class="slider-group" style="display: none;">
+      <label>Color: 
+        <input type="color" value="${species.color}" onchange="updateSpecies(${species.id}, 'color', this.value)">
+      </label>
+      <label>Speed 🏃: 
+        <input type="range" min="0.5" max="5" step="0.1" value="${species.speed}" onchange="updateSpecies(${species.id}, 'speed', parseFloat(this.value))">
+      </label>
+      <label>Count: 
+        <input type="number" min="1" max="100" value="${species.count}" onchange="updateCount(${species.id}, this.value)">
+      </label>
+      <label>Average Size 📏: 
+        <input type="range" min="3" max="15" step="0.1" value="${species.avgSize}" onchange="updateSize(${species.id}, 'avgSize', parseFloat(this.value))">
+      </label>
+      <label>Size Variation : 
+        <input type="range" min="0" max="10" step="0.1" value="${species.sizeVariation}" onchange="updateSize(${species.id}, 'sizeVariation', parseFloat(this.value))">
+      </label>
+      <label>Attraction 🧲: 
+        <input type="range" min="0.0" max="0.05" step="0.001" value="${species.schoolStrength}" onchange="updateSpecies(${species.id}, 'schoolStrength', parseFloat(this.value))">
+      </label>
+      <label>Repulsion ⬅️➡️: 
+        <input type="range" min="0" max="0.05" step="0.001" value="${species.repulsion}" onchange="updateSpecies(${species.id}, 'repulsion', parseFloat(this.value))">
+      </label>
+      <label>Path Curvature 🌊: 
+        <input type="range" min="0" max="0.1" step="0.01" value="${species.curveStrength}" onchange="updateSpecies(${species.id}, 'curveStrength', parseFloat(this.value))">
+      </label>
+      <label>Whirlpool 🔄: 
+        <input type="range" min="0" max="1" step="0.01" value="${species.whirlpool}" onchange="updateSpecies(${species.id}, 'whirlpool', parseFloat(this.value))">
+      </label>
+      <button onclick="removeSpecies(${species.id})">Delete</button>
+    </div>
   `;
   document.getElementById("speciesList").appendChild(speciesDiv);
-  
 }
-
 
 
 function openColorPicker(id) {
