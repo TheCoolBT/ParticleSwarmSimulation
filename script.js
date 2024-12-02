@@ -379,4 +379,60 @@ document.getElementById("backgroundColorPicker").addEventListener("input", (even
   canvas.style.backgroundColor = newColor; // Dynamically updates the canvas background
 });
 
+
+
+
+// Tutorial Popup Initialization
+document.addEventListener('DOMContentLoaded', () => {
+  const tutorialButton = document.createElement('button');
+  tutorialButton.id = 'tutorialButton';
+  tutorialButton.innerText = 'Tutorial';
+  tutorialButton.style.position = 'absolute';
+  tutorialButton.style.bottom = '60px'; // Adjust position relative to collision toggle
+  tutorialButton.style.left = '20px';
+  tutorialButton.style.zIndex = '100';
+  document.body.appendChild(tutorialButton);
+
+  const tutorialPopup = document.createElement('div');
+  tutorialPopup.id = 'tutorialPopup';
+  tutorialPopup.innerHTML = `
+    <h3>Tutorial</h3>
+    <ul>
+      <li><strong>Add Species:</strong> Adds a new species of particles to the simulation.</li>
+      <li><strong>Color:</strong> Customize the color of the particles.</li>
+      <li><strong>Speed:</strong> Adjust the speed of the particles.</li>
+      <li><strong>Attraction:</strong> Controls how strongly particles group together.</li>
+      <li><strong>Repulsion:</strong> Controls how strongly particles push away from each other.</li>
+      <li><strong>River:</strong> Adds a current that moves particles in a specific direction.</li>
+      <li><strong>Whirlpool:</strong> Causes particles to spin around their goals.</li>
+      <li><strong>Collision:</strong> Toggles whether particles collide with each other.</li>
+      <li><strong>Mouse Strength:</strong> Controls how strongly particles react to the mouse.</li>
+    </ul>
+    <button id="closeTutorial">Close</button>
+  `;
+  tutorialPopup.style.position = 'fixed';
+  tutorialPopup.style.top = '50%';
+  tutorialPopup.style.left = '50%';
+  tutorialPopup.style.transform = 'translate(-50%, -50%)';
+  tutorialPopup.style.padding = '20px';
+  tutorialPopup.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+  tutorialPopup.style.color = 'white';
+  tutorialPopup.style.borderRadius = '10px';
+  tutorialPopup.style.zIndex = '1000';
+  tutorialPopup.style.display = 'none';
+  document.body.appendChild(tutorialPopup);
+
+  tutorialButton.addEventListener('click', () => {
+    tutorialPopup.style.display = 'block';
+  });
+
+  tutorialPopup.addEventListener('click', (e) => {
+    if (e.target.id === 'closeTutorial' || e.target === tutorialPopup) {
+      tutorialPopup.style.display = 'none';
+    }
+  });
+});
+
+
+
 animate();

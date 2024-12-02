@@ -157,3 +157,32 @@ input[type="color"] {
   height: 25px;
   border: none;
 }
+
+/* Tutorial Button */
+#tutorialButton {
+  background: #444;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+}
+
+#tutorialButton:hover {
+  background: #666;
+}
+
+
+@keyframes fade {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+
+
+
+
+
