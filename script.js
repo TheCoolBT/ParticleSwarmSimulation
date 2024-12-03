@@ -28,7 +28,9 @@ class Particle {
     this.velocityX = (Math.random() * 2 - 1) * species.speed;
     this.velocityY = (Math.random() * 2 - 1) * species.speed;
     this.angle = Math.random() * Math.PI * 2; // For curved movement
+    this.layer = Math.random(); // Random layer weight
   }
+
 
   updateSize() {
     this.size = Math.max(
@@ -247,6 +249,14 @@ function createSpeciesUI(species) {
   document.getElementById("speciesList").appendChild(speciesDiv);
 }
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+
 
 function openColorPicker(id) {
   const colorInput = document.createElement("input");
@@ -352,15 +362,23 @@ function displayErrorMessage(message) {
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw mouse influence indicator
   ctx.beginPath();
   ctx.arc(mouse.x, mouse.y, 8, 0, Math.PI * 2);
   ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
   ctx.fill();
   ctx.closePath();
 
+  // Sort particles by their layer
+  particlesArray.sort((a, b) => a.layer - b.layer);
+
+  // Update and draw each particle
   particlesArray.forEach((particle) => particle.update());
+
   requestAnimationFrame(animate);
 }
+
 
 window.addEventListener("mousemove", (event) => {
   mouse.vx = event.movementX;
