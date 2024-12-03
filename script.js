@@ -153,6 +153,11 @@ class Particle {
 }  
 
 function addSpecies() {
+  const tutorialArrow = document.getElementById("tutorialArrow");
+  if (tutorialArrow) {
+    tutorialArrow.style.display = "none"; // Hide the tutorial arrow
+  }
+
   const id = nextSpeciesId++;
   const newSpecies = {
     id,
@@ -176,6 +181,7 @@ function addSpecies() {
   createSpeciesUI(newSpecies);
   addParticles(newSpecies, newSpecies.count);
 }
+
 
 
 function addParticles(species, count) {

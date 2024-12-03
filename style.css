@@ -181,6 +181,40 @@ input[type="color"] {
   100% { opacity: 1; }
 }
 
+#tutorialArrow {
+  position: absolute;
+  right: 275px; /* Position it to the left of the control panel */
+  top: 100px; /* Adjust based on the control panel's position */
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: pulse 1.5s infinite;
+}
+
+/* Animation for the arrow to pulse gently */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateX(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
 
 
 
