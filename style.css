@@ -136,6 +136,19 @@ input[type="color"] {
   font-size: 14px;
 }
 
+#trailToggle {
+  position: absolute;
+  bottom: 20px; /* Adjust position relative to collision toggle */
+  left: 180px;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+
 
 #backgroundColorContainer {
   position: absolute;

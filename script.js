@@ -360,8 +360,18 @@ function displayErrorMessage(message) {
   }, 3000);
 }
 
+let trailsEnabled = true; // Default to trails enabled
+
 function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (trailsEnabled) {
+    // Use the current background color with transparency
+    const backgroundColor = getComputedStyle(canvas).backgroundColor;
+    ctx.fillStyle = backgroundColor.replace("rgb", "rgba").replace(")", ", 0.2)"); // Add transparency
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  } else {
+    // Fully clear the canvas if trails are disabled
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
 
   // Draw mouse influence indicator
   ctx.beginPath();
@@ -370,14 +380,18 @@ function animate() {
   ctx.fill();
   ctx.closePath();
 
-  // Sort particles by their layer
-  particlesArray.sort((a, b) => a.layer - b.layer);
+  // Shuffle particles for random layering
+  shuffleArray(particlesArray);
 
   // Update and draw each particle
   particlesArray.forEach((particle) => particle.update());
 
   requestAnimationFrame(animate);
 }
+
+
+
+
 
 
 window.addEventListener("mousemove", (event) => {
@@ -402,6 +416,11 @@ document.getElementById("backgroundColorPicker").addEventListener("input", (even
   const newColor = event.target.value;
   canvas.style.backgroundColor = newColor; // Dynamically updates the canvas background
 });
+
+document.getElementById("trailCheckbox").addEventListener("change", (event) => {
+  trailsEnabled = event.target.checked;
+});
+
 
 
 
