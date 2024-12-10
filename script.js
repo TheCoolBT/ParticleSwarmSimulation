@@ -51,26 +51,26 @@ class Particle {
   update() {
     // Check collision toggle state
     const collisionEnabled = document.getElementById("collisionCheckbox").checked;
-  
+
     // Mouse influence
     const dx = this.x - mouse.x;
     const dy = this.y - mouse.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-  
+
     if (distance < mouse.radius) {
       this.velocityX += mouse.vx * 0.05 * mouseStrength;
       this.velocityY += mouse.vy * 0.05 * mouseStrength;
     }
-  
+
     // Decelerate mouse effect
     mouse.vx *= 0.99999;
     mouse.vy *= 0.99999;
-  
+
     // Whirlpool and goal influence
     const goalDx = this.species.goalX - this.x;
     const goalDy = this.species.goalY - this.y;
     const goalDistance = Math.sqrt(goalDx * goalDx + goalDy * goalDy);
-  
+
     const whirlpoolEffect = this.species.whirlpool * 0.1;
     if (goalDistance > this.size) {
       if (whirlpoolEffect > 0) {
@@ -98,23 +98,23 @@ class Particle {
       const dx = particle.x - this.x;
       const dy = particle.y - this.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-  
+
       if (distance < this.species.viewDistance && particle !== this) {
         const angle = Math.atan2(dy, dx);
         const force = (this.species.repulsion * (this.species.viewDistance - distance)) / this.species.viewDistance;
-  
+
         this.velocityX -= Math.cos(angle) * force;
         this.velocityY -= Math.sin(angle) * force;
       }
     });
-  
+
     // Handle collision only if enabled
     if (collisionEnabled) {
       particlesArray.forEach((particle) => {
         const dx = particle.x - this.x;
         const dy = particle.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-  
+
         if (distance < this.size + particle.size && particle !== this) {
           const angle = Math.atan2(dy, dx);
           const overlap = (this.size + particle.size - distance) * 0.1;
@@ -125,34 +125,37 @@ class Particle {
         }
       });
     }
-  
+
     // Path Curvature influence
     if (this.species.curveStrength > 0) {
       this.angle += this.species.curveStrength;
       this.velocityX += Math.cos(this.angle) * 0.1;
       this.velocityY += Math.sin(this.angle) * 0.1;
     }
-  
+
     // Apply speed cap
     const speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
     if (speed > this.species.speed) {
       this.velocityX *= 0.98;
       this.velocityY *= 0.98;
     }
-  
+
     // Update position
     this.x += this.velocityX;
     this.y += this.velocityY;
-  
+
     // Screen edge wrap-around
     if (this.x > canvas.width) this.x = 0;
     if (this.x < 0) this.x = canvas.width;
     if (this.y > canvas.height) this.y = 0;
     if (this.y < 0) this.y = canvas.height;
-  
+
     this.draw();
   }
-}  
+
+  
+}
+    
 
 function addSpecies() {
   const tutorialArrow = document.getElementById("tutorialArrow");
@@ -217,7 +220,7 @@ function createSpeciesUI(species) {
         <input type="color" value="${species.color}" onchange="updateSpecies(${species.id}, 'color', this.value)">
       </label>
       <label>Speed 🏃: 
-        <input type="range" min="0.5" max="5" step="0.1" value="${species.speed}" onchange="updateSpecies(${species.id}, 'speed', parseFloat(this.value))">
+        <input type="range" min="0.5" max="10" step="0.1" value="${species.speed}" onchange="updateSpecies(${species.id}, 'speed', parseFloat(this.value))">
       </label>
       <label>Count: 
         <input type="number" min="1" max="100" value="${species.count}" onchange="updateCount(${species.id}, this.value)">
@@ -364,30 +367,25 @@ let trailsEnabled = true; // Default to trails enabled
 
 function animate() {
   if (trailsEnabled) {
-    // Use the current background color with transparency
     const backgroundColor = getComputedStyle(canvas).backgroundColor;
-    ctx.fillStyle = backgroundColor.replace("rgb", "rgba").replace(")", ", 0.2)"); // Add transparency
+    ctx.fillStyle = backgroundColor.replace("rgb", "rgba").replace(")", ", 0.2)");
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   } else {
-    // Fully clear the canvas if trails are disabled
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Draw mouse influence indicator
   ctx.beginPath();
   ctx.arc(mouse.x, mouse.y, 8, 0, Math.PI * 2);
   ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
   ctx.fill();
   ctx.closePath();
 
-  // Shuffle particles for random layering
-  shuffleArray(particlesArray);
-
-  // Update and draw each particle
+  // No shuffle, preserve consistent layering
   particlesArray.forEach((particle) => particle.update());
 
   requestAnimationFrame(animate);
 }
+
 
 
 
